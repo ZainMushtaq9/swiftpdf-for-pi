@@ -1,0 +1,22 @@
+# Dependencies & build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/tests/__pycache__/
+backend/.pytest_cache/
+__pycache__/
+
+# Secrets & local state (never commit)
+.env
+frontend/.env
+backend/.env
+backend/data/
+*.db
+*.db-journal
+
+# OS / editor
+.DS_Store
+*.log

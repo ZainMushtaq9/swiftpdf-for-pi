@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- SwiftPDF for Pi — app mark. Original design: a document page with
+       a checkmark. Teal (#176B58) + amber (#E8A838). Deliberately NOT
+       Pi's logo and NOT Pi's brand purple — trademark-safe. -->
+  <rect width="120" height="120" rx="26" fill="#176B58"/>
+  <path d="M32 22h46l14 14v62H32z" fill="#ffffff"/>
+  <path d="M78 22l14 14H78z" fill="#dfe7e4"/>
+  <rect x="42" y="40" width="36" height="6" rx="3" fill="#bcd8cc"/>
+  <rect x="42" y="52" width="28" height="6" rx="3" fill="#bcd8cc"/>
+  <path d="M42 74l11 11 25-27" fill="none" stroke="#E8A838" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

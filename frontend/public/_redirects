@@ -1,0 +1,3 @@
+# SPA fallback for Cloudflare Pages: every route serves the React app.
+# Without this, direct visits/refreshes on /pro, /privacy, /tools/* return 404.
+/* /index.html 200

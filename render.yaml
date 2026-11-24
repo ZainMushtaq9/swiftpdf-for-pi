@@ -1,0 +1,42 @@
+# SwiftPDF for Pi — Render Blueprint (Pi Next 2026)
+# One-click deploy: Render dashboard → New → Blueprint → select this repo.
+# The dashboard will prompt for PI_API_KEY and PI_APP_ID (sync: false below).
+# Until the app is registered in the Pi Developer Portal, enter CHANGE_ME for
+# both — auth/payments will fail until real values are set, but the service
+# itself will run and /api/health will respond.
+#
+# AFTER the frontend is deployed on Cloudflare Pages, update CORS_ORIGINS in
+# the Render dashboard to include the Pages URL, e.g.
+#   https://swiftpdf-for-pi.pages.dev
+# (plus the localhost entries if local dev is still needed). Without this,
+# browsers will block the frontend's /api calls.
+services:
+  - type: web
+    name: swiftpdf-api
+    env: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PI_API_KEY
+        sync: false
+      - key: PI_APP_ID
+        sync: false
+      - key: PI_NETWORK
+        value: staging
+      - key: PI_PLATFORM_API_BASE
+        value: https://api.minepi.com/v2
+      - key: DATABASE_PATH
+        value: data/app.db
+      - key: PRO_PRICE_PI
+        value: "1.0"
+      - key: PRO_MEMO
+        value: Pro unlock — SwiftPDF for Pi
+      - key: SESSION_DAYS
+        value: "30"
+      - key: CORS_ORIGINS
+        value: http://localhost:5173,http://localhost:4173
+      - key: PI_MOCK_MODE
+        value: "false"

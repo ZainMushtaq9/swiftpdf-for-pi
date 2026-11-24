@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- App name chosen by the user (24 Nov 2026): SwiftPDF for Pi.
+         It follows Pi's "<Name> for Pi" trademark form; the Trademark
+         Licensing Agreement is signed via the Developer Portal at
+         listing time (see README). -->
+    <meta name="description" content="SwiftPDF for Pi — free PDF tools in your browser: merge, split, compress, rotate, sign and convert PDFs. Nothing is uploaded; Pro unlocks batch processing, OCR and higher limits with Pi." />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Set the theme before first paint to avoid a light/dark flash.
+      try {
+        var t = localStorage.getItem("pi-pdf-theme");
+        if (t !== "dark" && t !== "light") {
+          t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    </script>
+    <title>SwiftPDF for Pi — Free PDF Tools in Your Browser</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

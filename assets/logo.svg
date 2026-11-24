@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+  <!-- SwiftPDF for Pi — listing logo (mark + wordmark). Original design.
+       Teal (#176B58) + amber (#E8A838); no Pi logo, no Pi brand colors. -->
+  <g>
+    <rect width="120" height="120" rx="26" fill="#176B58"/>
+    <path d="M32 22h46l14 14v62H32z" fill="#ffffff"/>
+    <path d="M78 22l14 14H78z" fill="#dfe7e4"/>
+    <rect x="42" y="40" width="36" height="6" rx="3" fill="#bcd8cc"/>
+    <rect x="42" y="52" width="28" height="6" rx="3" fill="#bcd8cc"/>
+    <path d="M42 74l11 11 25-27" fill="none" stroke="#E8A838" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="140" y="66" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="800" fill="#102A43">SwiftPDF</text>
+  <text x="142" y="96" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="600" fill="#5b6b76">for Pi</text>
+</svg>
