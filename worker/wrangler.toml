@@ -1,0 +1,26 @@
+name = "swiftpdf-api"
+main = "src/index.js"
+compatibility_date = "2026-11-24"
+
+# D1 database — create first, then paste the real database_id here:
+#   CLOUDFLARE_ACCOUNT_ID=4fbf954a937c1e97b747e42da1eb1c40 npx wrangler d1 create swiftpdf
+#   npx wrangler d1 migrations apply swiftpdf --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "swiftpdf"
+database_id = "REPLACE_WITH_REAL_D1_DATABASE_ID"
+
+[vars]
+PI_NETWORK = "staging"
+PI_PLATFORM_API_BASE = "https://api.minepi.com/v2"
+PRO_PRICE_PI = "1.0"
+PRO_MEMO = "Pro unlock — SwiftPDF for Pi"
+SESSION_DAYS = "30"
+CORS_ORIGINS = "https://swiftpdf-for-pi.pages.dev,http://localhost:5173,http://localhost:4173"
+# WARNING: mock mode returns canned Pi responses and must NEVER be "true" in
+# production — it would grant Pro without real payment. Local testing only.
+PI_MOCK_MODE = "false"
+
+# Secrets (set with `wrangler secret put NAME` — never commit values):
+#   PI_API_KEY  (Pi Server API Key from the Developer Portal; CHANGE_ME until registered)
+#   PI_APP_ID   (Pi App ID from the Developer Portal; CHANGE_ME until registered)

@@ -20,3 +20,5 @@ backend/data/
 # OS / editor
 .DS_Store
 *.log
+
+.wrangler/

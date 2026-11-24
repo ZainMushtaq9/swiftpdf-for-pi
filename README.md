@@ -6,7 +6,7 @@ device. Pi Authentication signs users in, and a one-time Pi payment unlocks
 Pro (higher limits, batch processing, full OCR and conversions).
 
 - **Deadline:** January 5, 2027, 11:59 PM PST (January 6, 2027, 07:59 UTC)
-- **Budget:** $0 — free tiers only (Cloudflare Pages + Render free tier)
+- **Budget:** $0 — free tiers only (Cloudflare Pages + Cloudflare Workers free tier)
 - **Status:** built and verified locally in mock mode (see Verification).
   No real Pi credentials exist yet — live Pi paths are untested until the
   app is registered in the Pi Developer Portal (see
@@ -43,8 +43,8 @@ Browser (Pi Browser / any browser)
        ├─ PDF tools: pdf-lib, pdf.js, Tesseract.js, docx, html2pdf.js
        │  — all processing in the browser; no file ever uploads anywhere
        ├─ Pi SDK (lazy-loaded, only on first Pi interaction)
-       └─ /api calls ──▶ FastAPI backend (Render free tier)
-                           ├─ SQLite (users, sessions, payments, entitlements)
+       └─ /api calls ──▶ Cloudflare Worker + D1 (JS, `worker/`)
+                           ├─ D1 (users, sessions, payments, entitlements)
                            ├─ verifies Pi access tokens via GET /v2/me
                            └─ approves/completes payments via /v2/payments/*
 ```
@@ -62,8 +62,9 @@ Key design rules, baked in from the Pi listing requirements:
 - **Entitlements are re-derivable:** `/api/entitlements/reverify` rebuilds a
   user's Pro status from the Platform's payment records, so a lost database
   cannot permanently lose a purchase.
-- **SQLite only — no Render free Postgres:** the free Postgres database
-  expires 30 days after creation, inside the hackathon window.
+- **D1 only — no external database:** the Worker stores users, sessions,
+  payments and entitlements in Cloudflare D1 (SQLite-compatible, free tier).
+  The FastAPI implementation in `backend/` is kept as a reference.
 - **Server API Key lives in the backend environment only** — never in client
   code, never in logs, never in git.
 - **Sandbox/Testnet first:** the same code points at Staging or Production
@@ -83,12 +84,17 @@ pi-next-pdf-app/
 │   ├── src/tools/pdf/          the 13 tool components + pdf helpers
 │   ├── src/pages/              Home, Pro, Privacy, ToolPage, 404
 │   └── public/favicon.svg
-├── backend/             FastAPI app (Render free tier)
+├── backend/             FastAPI app (reference implementation)
 │   ├── app/main.py      10 endpoints (health, config, auth, entitlements, payments)
 │   ├── app/pi_api.py    Pi Platform API client (+ mock mode)
 │   ├── app/auth.py      session tokens (SHA-256 hashed)
 │   ├── app/db.py        SQLite schema (users, sessions, payments, entitlements)
 │   └── tests/test_api.py
+├── worker/              Cloudflare Worker + D1 (the deployed backend)
+│   ├── src/index.js     10 endpoints (same routes as the FastAPI app)
+│   ├── migrations/      D1 schema (users, sessions, payments, entitlements)
+│   ├── tests/           27 Worker tests
+│   └── wrangler.toml
 ├── tests/pdf.test.mjs   18 Node unit tests for the PDF logic
 ├── scripts/e2e-verify.mjs   Playwright end-to-end verification (mock mode)
 ├── assets/
@@ -113,7 +119,12 @@ bugs found and fixed during verification of this app:
 ## Quick start (local dev, mock Pi)
 
 ```bash
-# Backend (venv already created; first run: python -m venv .venv && .venv/bin/pip install -r requirements.txt)
+# Backend — Cloudflare Worker (the deployed backend; see worker/README.md)
+cd worker
+npm install
+npm run dev          # wrangler dev on http://localhost:8787, local D1
+
+# Backend — FastAPI reference implementation (venv already created; first run: python -m venv .venv && .venv/bin/pip install -r requirements.txt)
 cd backend
 cp .env.example .env        # set PI_MOCK_MODE=true for local dev
 .venv/bin/uvicorn app.main:app --reload --port 8000
@@ -159,6 +170,7 @@ Backend (`backend/.env` — see `backend/.env.example` and
 ```bash
 npm test            # 18 Node unit tests (PDF logic, pdf-lib)
 npm run test:backend  # 13 FastAPI tests (auth, payments, entitlements)
+npm --prefix worker test  # 27 Worker tests (same coverage, JS port)
 node scripts/e2e-verify.mjs   # Playwright E2E in mock mode (see below)
 ```
 
@@ -183,7 +195,9 @@ OCR engine's CDN requests through curl — Chromium cannot reach the internet
 on this VM (the egress proxy's CONNECT tunnel fails for it), while curl
 reaches the CDN fine (HTTP 200); real users reach the CDN directly, so no
 app change was needed. The clean production-default build contains zero
-mock code (Vite tree-shakes the `VITE_PI_MOCK` branch entirely).
+mock code (Vite tree-shakes the `VITE_PI_MOCK` branch entirely). Worker
+backend: 27/27 tests pass plus a live `wrangler dev` smoke test (see
+`worker/README.md`).
 
 ## Deployment ($0)
 
@@ -191,13 +205,14 @@ mock code (Vite tree-shakes the `VITE_PI_MOCK` branch entirely).
   output `frontend/dist`. Set `VITE_API_URL` to the deployed backend URL and
   `VITE_PI_SANDBOX` to match the registered app's network. `VITE_PI_MOCK`
   must be unset/`false`.
-- **Backend — Render free tier:** Python web service, build
-  `pip install -r requirements.txt`, start
-  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set the env vars above
-  (real `PI_API_KEY`/`PI_APP_ID`, `PI_MOCK_MODE=false`). SQLite file lives on
-  Render's ephemeral disk — acceptable because entitlements are re-derivable
-  from the Platform API (see Architecture). Note: Render free services sleep
-  after inactivity; the first API call after sleep is slow.
+- **Backend — Cloudflare Worker + D1 (free tier):** see `worker/README.md`.
+  Deploy with `wrangler d1 create swiftpdf`, `npm run migrate`,
+  `wrangler secret put PI_API_KEY` / `PI_APP_ID` (real values, or the
+  `CHANGE_ME` placeholders until the app is registered), then
+  `wrangler deploy`. Workers do not sleep, and D1 persists — no cold-start
+  delay, no lost database. (Render, Koyeb and Hugging Face Spaces were all
+  tried and blocked: Render suspended for non-payment, Koyeb closed to new
+  signups, HF Docker/CPU paid-only on this account.)
 - Vercel Hobby is **not** used (non-commercial terms).
 
 ## Listing assets
@@ -261,5 +276,5 @@ from his phone:
 - The Pi SDK is loaded from `https://sdk.minepi.com/pi-sdk.js` at runtime
   (required by Pi); if that host is unreachable, Pi features are unavailable
   but the free tools still work.
-- Render's free backend sleeps after inactivity, so the first sign-in or
-  payment after a quiet period is slow.
+- The Worker runs on Cloudflare's free tier (100,000 requests/day), far
+  above anything the hackathon judging will generate.
